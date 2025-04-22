@@ -1,0 +1,439 @@
+
+{% extends 'prospectivity/base.html' %}
+{% block title %}Projects - CoperCore AI{% endblock %}
+{% block content %}
+<h2>Projects</h2>
+<button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#projectModal">
+    Add Project
+</button>
+<!-- Modal for Project Creation -->
+<div class="modal fade" id="projectModal" tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="projectModalLabel">Create Project</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form hx-post="{% url 'project_create' %}" hx-target="#project-list" hx-swap="innerHTML" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Project Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="project_code" class="form-label">Project Code</label>
+                        <input type="text" class="form-control" id="project_code" name="project_code">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="project_status" class="form-label">Project Status</label>
+                        <select class="form-control" id="project_status" name="project_status">
+                            <option value="Planned">Planned</option>
+                            <option value="Active">Active</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Archived">Archived</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="country" class="form-label">Country</label>
+                        <input type="text" class="form-control" id="country" name="country" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="region" class="form-label">Region</label>
+                        <input type="text" class="form-control" id="region" name="region" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="target_minerals" class="form-label">Target Minerals</label>
+                        <input type="text" class="form-control" id="target_minerals" name="target_minerals" placeholder="Comma-separated list">
+                    </div>
+                    <div class="mb-3">
+                        <label for="mineral_type" class="form-label">Mineral Type</label>
+                        <input type="text" class="form-control" id="mineral_type" name="mineral_type">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Project List -->
+<div id="project-list">
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Search projects">
+    </div>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Project Name</th>
+                <th>Project Code</th>
+                <th>Country</th>
+                <th>Region</th>
+                <th>Target Minerals</th>
+                <th>Project Status</th>
+                <th>Date Created</th>
+                <th>Date Updated</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for project in projects %}
+            <tr>
+                <td>{{ project.name }}</td>
+                <td>{{ project.project_code|default:"N/A" }}</td>
+                <td>{{ project.country }}</td>
+                <td>{{ project.region }}</td>
+                <td>{{ project.target_minerals|default:"N/A" }}</td>
+                <td>{{ project.project_status }}</td>
+                <td>{{ project.created_date|date:"Y-m-d" }}</td>
+                <td>{{ project.updated_date|date:"Y-m-d" }}</td>
+                <td><a href="{% url 'project_detail' project.id %}">Open Project</a></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9">No projects available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+```
+
+#### project_detail.html
+Update to show project details and dataset upload/list with the new fields.
+
+<xaiArtifact artifact_id="5242f96b-55df-4d73-9387-95c46fb1b428" artifact_version_id="d1ca87c6-8b19-4d90-bbd5-077563a6b482" title="prospectivity/project_detail.html" contentType="text/html">
+```html
+{% extends 'prospectivity/base.html' %}
+{% block title %}Project: {{ project.name }} - CoperCore AI{% endblock %}
+{% block content %}
+<h2>Project: {{ project.name }}</h2>
+<p><strong>Project Code:</strong> {{ project.project_code|default:"N/A" }}</p>
+<p><strong>Description:</strong> {{ project.description|default:"N/A" }}</p>
+<p><strong>Project Status:</strong> {{ project.project_status }}</p>
+<p><strong>Country:</strong> {{ project.country }}</p>
+<p><strong>Region:</strong> {{ project.region }}</p>
+<p><strong>Target Minerals:</strong> {{ project.target_minerals|default:"N/A" }}</p>
+<p><strong>Mineral Type:</strong> {{ project.mineral_type|default:"N/A" }}</p>
+<p><strong>Created On:</strong> {{ project.created_date|date:"Y-m-d" }}</p>
+<p><strong>Updated On:</strong> {{ project.updated_date|date:"Y-m-d" }}</p>
+<p><strong>Updated By:</strong> {{ project.user_updated.username }}</p>
+<h3>Datasets</h3>
+<button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#datasetModal">
+    Upload Dataset
+</button>
+<!-- Modal for Dataset Upload -->
+<div class="modal fade" id="datasetModal" tabindex="-1" aria-labelledby="datasetModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="datasetModalLabel">Upload Dataset</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form hx-post="{% url 'dataset_upload' project.id %}" hx-target="#dataset-list" hx-swap="innerHTML" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="dataset_names" class="form-label">Dataset Name</label>
+                        <input type="text" class="form-control" id="dataset_names" name="dataset_names" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="dataset_types" class="form-label">Dataset Type</label>
+                        <select class="form-control" id="dataset_types" name="dataset_types">
+                            <option value="Raster">Raster</option>
+                            <option value="Vector">Vector</option>
+                            <option value="Tabular">Tabular</option>
+                            <option value="metadata">Metadata</option>
+                            <option value="tiff">TIFF</option>
+                            <option value="shapefiles">Shapefiles</option>
+                            <option value="csv">CSV</option>
+                            <option value="xml">XML</option>
+                            <option value="json">JSON</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Upload Dataset</label>
+                        <input class="form-control" type="file" id="file" name="file" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="crs" class="form-label">Coordinate Reference System</label>
+                        <select class="form-control" id="crs" name="crs">
+                            <option value="GCS(geological coorsdinate system)">GCS</option>
+                            <option value="PCS(projected cordinate system)">PCS</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="band_info" class="form-label">Band Info</label>
+                        <select class="form-control" id="band_info" name="band_info">
+                            <option value="RED">Red</option>
+                            <option value="GREEN">Green</option>
+                            <option value="BLUE">Blue</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Dataset List -->
+<div id="dataset-list">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Dataset Name</th>
+                <th>Dataset Type</th>
+                <th>CRS</th>
+                <th>Band Info</th>
+                <th>Date Uploaded</th>
+                <th>Size</th>
+                <th>Anomaly Reports</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dataset in project.geospatialdatasets_set.all %}
+            <tr>
+                <td>{{ dataset.dataset_names }}</td>
+                <td>{{ dataset.dataset_types }}</td>
+                <td>{{ dataset.crs }}</td>
+                <td>{{ dataset.band_info }}</td>
+                <td>{{ dataset.updated_on|date:"Y-m-d" }}</td>
+                <td>{{ dataset.file.size|filesizeformat|default:"N/A" }}</td>
+                <td><a href="#">View Report</a></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">No datasets available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+```
+
+#### upload.html
+Update the dataset upload form and table to include the new fields.
+
+<xaiArtifact artifact_id="b3dcc17a-cc3c-407b-8c90-940211bcde78" artifact_version_id="2e068f6d-ef3e-4753-8696-facb62207a99" title="prospectivity/upload.html" contentType="text/html">
+```html
+{% extends 'prospectivity/base.html' %}
+{% block title %}Upload Dataset - CoperCore AI{% endblock %}
+{% block content %}
+<h2>Upload Dataset</h2>
+<button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#datasetModal">
+    Upload Dataset
+</button>
+<!-- Modal for Dataset Upload -->
+<div class="modal fade" id="datasetModal" tabindex="-1" aria-labelledby="datasetModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="datasetModalLabel">Upload Dataset</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form hx-post="{% url 'upload_dataset' %}" hx-target="#dataset-list" hx-swap="innerHTML" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="dataset_names" class="form-label">Dataset Name</label>
+                        <input type="text" class="form-control" id="dataset_names" name="dataset_names" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="dataset_types" class="form-label">Dataset Type</label>
+                        <select class="form-control" id="dataset_types" name="dataset_types">
+                            <option value="Raster">Raster</option>
+                            <option value="Vector">Vector</option>
+                            <option value="Tabular">Tabular</option>
+                            <option value="metadata">Metadata</option>
+                            <option value="tiff">TIFF</option>
+                            <option value="shapefiles">Shapefiles</option>
+                            <option value="csv">CSV</option>
+                            <option value="xml">XML</option>
+                            <option value="json">JSON</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Upload Dataset</label>
+                        <input class="form-control" type="file" id="file" name="file" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="crs" class="form-label">Coordinate Reference System</label>
+                        <select class="form-control" id="crs" name="crs">
+                            <option value="GCS(geological coorsdinate system)">GCS</option>
+                            <option value="PCS(projected cordinate system)">PCS</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="band_info" class="form-label">Band Info</label>
+                        <select class="form-control" id="band_info" name="band_info">
+                            <option value="RED">Red</option>
+                            <option value="GREEN">Green</option>
+                            <option value="BLUE">Blue</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Dataset List -->
+<div id="dataset-list">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Dataset Name</th>
+                <th>Dataset Type</th>
+                <th>CRS</th>
+                <th>Band Info</th>
+                <th>Date Uploaded</th>
+                <th>Size</th>
+                <th>Anomaly Reports</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dataset in datasets %}
+            <tr>
+                <td>{{ dataset.dataset_names }}</td>
+                <td>{{ dataset.dataset_types }}</td>
+                <td>{{ dataset.crs }}</td>
+                <td>{{ dataset.band_info }}</td>
+                <td>{{ dataset.updated_on|date:"Y-m-d" }}</td>
+                <td>{{ dataset.file.size|filesizeformat|default:"N/A" }}</td>
+                <td><a href="#">View Report</a></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">No datasets available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+```
+
+#### Partials for HTMX
+Update the partial templates to reflect the new fields.
+
+<xaiArtifact artifact_id="00b13a5f-158d-4cc4-b4e7-f8b60dc43657" artifact_version_id="82b22c0e-e292-478b-8623-6e04c95a12f1" title="prospectivity/partials/project_form.html" contentType="text/html">
+```html
+<div id="project-list">
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Search projects">
+    </div>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Project Name</th>
+                <th>Project Code</th>
+                <th>Country</th>
+                <th>Region</th>
+                <th>Target Minerals</th>
+                <th>Project Status</th>
+                <th>Date Created</th>
+                <th>Date Updated</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for project in projects %}
+            <tr>
+                <td>{{ project.name }}</td>
+                <td>{{ project.project_code|default:"N/A" }}</td>
+                <td>{{ project.country }}</td>
+                <td>{{ project.region }}</td>
+                <td>{{ project.target_minerals|default:"N/A" }}</td>
+                <td>{{ project.project_status }}</td>
+                <td>{{ project.created_date|date:"Y-m-d" }}</td>
+                <td>{{ project.updated_date|date:"Y-m-d" }}</td>
+                <td><a href="{% url 'project_detail' project.id %}">Open Project</a></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9">No projects available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+```
+
+<xaiArtifact artifact_id="dfb2bd15-1ae3-4c22-8ae0-9997a9db7c18" artifact_version_id="b33f5918-42dd-4119-9bc0-edc2258e6016" title="prospectivity/partials/dataset_list.html" contentType="text/html">
+```html
+<div id="dataset-list">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Dataset Name</th>
+                <th>Dataset Type</th>
+                <th>CRS</th>
+                <th>Band Info</th>
+                <th>Date Uploaded</th>
+                <th>Size</th>
+                <th>Anomaly Reports</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dataset in project.geospatialdatasets_set.all %}
+            <tr>
+                <td>{{ dataset.dataset_names }}</td>
+                <td>{{ dataset.dataset_types }}</td>
+                <td>{{ dataset.crs }}</td>
+                <td>{{ dataset.band_info }}</td>
+                <td>{{ dataset.updated_on|date:"Y-m-d" }}</td>
+                <td>{{ dataset.file.size|filesizeformat|default:"N/A" }}</td>
+                <td><a href="#">View Report</a></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">No datasets available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+```
+
+<xaiArtifact artifact_id="a1b838c1-807d-4866-99b0-ce1b070e0c31" artifact_version_id="a1c92f43-53b0-4b69-94e7-10fcce97e705" title="prospectivity/partials/upload_form.html" contentType="text/html">
+```html
+<div id="dataset-list">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Dataset Name</th>
+                <th>Dataset Type</th>
+                <th>CRS</th>
+                <th>Band Info</th>
+                <th>Date Uploaded</th>
+                <th>Size</th>
+                <th>Anomaly Reports</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dataset in datasets %}
+            <tr>
+                <td>{{ dataset.dataset_names }}</td>
+                <td>{{ dataset.dataset_types }}</td>
+                <td>{{ dataset.crs }}</td>
+                <td>{{ dataset.band_info }}</td>
+                <td>{{ dataset.updated_on|date:"Y-m-d" }}</td>
+                <td>{{ dataset.file.size|filesizeformat|default:"N/A" }}</td>
+                <td><a href="#">View Report</a></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">No datasets available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

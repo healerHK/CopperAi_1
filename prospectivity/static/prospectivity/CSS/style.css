@@ -1,0 +1,15 @@
+body {
+    background-color: #FEF7FF;
+}
+
+h1 {
+    font-size: 2.5em;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    color: #4A4A4A;
+    text-align: center;
+}
+#map {
+    border: 1px solid black;
+    height: 500px;
+    width: 100%;
+}

@@ -1,0 +1,17 @@
+<xaiArtifact artifact_id="08adacb4-a26d-42d4-94d5-bd838b89880b" artifact_version_id="bc2d4e10-05ba-4c41-9880-8210c1b1ec8f" title="prospectivity/menubar.html" contentType="text/html">
+    ```html
+    <ul class="list-group">
+        <li class="list-group-item {% if request.path == '/upload/' %}active{% endif %}">
+            <a href="{% url 'upload' %}"><span>Upload File</span></a>
+        </li>
+        <li class="list-group-item {% if request.path == '/project/' %}active{% endif %}">
+            <a href="{% url 'project' %}"><span>Add Project</span></a>
+        </li>
+        <li class="list-group-item {% if request.path == '/map/' %}active{% endif %}">
+            <a href="{% url 'map' %}"><span>Map</span></a>
+        </li>
+        <li class="list-group-item {% if request.path == '/help/' %}active{% endif %}">
+            <a href="{% url 'help' %}"><span>Help</span></a>
+        </li>
+    </ul>
+    ```
